@@ -1,0 +1,84 @@
+---
+const { selector, title = "open/close", classes } = Astro.props;
+---
+<open-all data-selector={selector}>
+	<button class:list={["open-all", classes]} type="button">{title}</button>
+</open-all>
+
+<script>
+	class OpenAll extends HTMLElement {
+		constructor() {
+			super();
+
+			var wasclosed = true;
+			var anyclosed = false;
+			var anyopen = false;
+			var flipped = false;
+
+			const chosenClass = this.dataset.selector;
+
+			window.addEventListener('load', () => {
+				document.querySelectorAll(chosenClass).forEach(element => {
+					if (!(element.nodeName == "DETAILS" && element.querySelector("SUMMARY") != null && element.childNodes.length == 1) && element.open == false) {
+						anyclosed = true;
+					}
+				});
+				if (anyclosed == false) {
+					wasclosed = !wasclosed;
+				}
+			});
+
+			const button = this.querySelector('button');
+			button.addEventListener('click', () => {
+				anyclosed = false;
+				anyopen = false;
+				flipped = false;
+				document.querySelectorAll(chosenClass).forEach(element => {
+					if (!(element.nodeName == "DETAILS" && element.querySelector("SUMMARY") != null && element.childNodes.length == 1)) {
+						if (element.open == false) {
+							anyclosed = true;
+						}
+						if (!(element.nodeName == "DETAILS" && element.querySelector("SUMMARY") != null && element.childNodes.length == 1) && element.open == true) {
+							anyopen = true;
+						}
+					}
+				});
+				if (anyclosed == false) {
+					wasclosed = !wasclosed;
+				}
+				document.querySelectorAll(chosenClass).forEach(element => {
+					if (!(element.nodeName == "DETAILS" && element.querySelector("SUMMARY") != null && element.childNodes.length == 1)) {
+						if (wasclosed == false) {
+							if (anyclosed == false) {
+								element.open = false;
+							}
+							if (anyopen == false) {
+								element.open = true;
+								flipped = true;
+							} else {
+								element.open = false;
+							}
+						}
+						if (wasclosed == true) {
+							if (anyopen == true) {
+								element.open = true;
+							}
+							if (anyclosed == false) {
+								element.open = false;
+								flipped = true;
+							} else {
+								element.open = true;
+							}
+						}
+					}
+				});
+				if (flipped == true) {
+					wasclosed = !wasclosed;
+				}
+				wasclosed = !wasclosed;
+			});
+		};
+	};
+
+	customElements.define('open-all', OpenAll);
+</script>
